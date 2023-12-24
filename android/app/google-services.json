@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "833361809243",
+    "project_id": "school-driver-4806b",
+    "storage_bucket": "school-driver-4806b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833361809243:android:60f45a4d78ddaab9b1547e",
+        "android_client_info": {
+          "package_name": "com.example.school_driver"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbSPr4QFo_AQFmGSkmMAX0Grg1bo3Z5Ik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
