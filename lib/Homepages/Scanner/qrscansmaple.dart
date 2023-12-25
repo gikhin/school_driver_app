@@ -202,8 +202,12 @@ class _QrCodeSampleState extends State<QrCodeSample> {
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                                         children: [
-                                          ElevatedButton(onPressed: (){}, child: Text('Check In')),
-                                          ElevatedButton(onPressed: (){}, child: Text('Check Out'))
+                                          ElevatedButton(onPressed: (){
+
+                                          }, child: Text('Check In')),
+                                          ElevatedButton(onPressed: (){
+
+                                          }, child: Text('Check Out'))
                                         ],
                                       )
 

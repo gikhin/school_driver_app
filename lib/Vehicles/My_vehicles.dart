@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:school_driver/Utils/Appurls/appurl.dart';
 import 'package:school_driver/Utils/Utils.dart';
+import '../Login and Signup/Profile.dart';
 import '../Widgets/buttons.dart';
 import '../Widgets/text_field.dart';
 import '../constents.dart';
@@ -22,6 +23,8 @@ class _MyvehiclesState extends State<Myvehicles> {
   final vehicleNumber = TextEditingController();
   final capacity = TextEditingController();
   final image = TextEditingController();
+
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -78,10 +81,11 @@ class _MyvehiclesState extends State<Myvehicles> {
 
   Future<void> addVehicles() async {
     final Map<String, dynamic> data = {
-      'id': Utils.userLoggedId,
-      'vehicle_no': vehicleNumber.text,
-      'vehicle_name': vehicleName.text,
+      'driver_id': Utils.userLoggedId,
       'seat_capacity': int.parse(capacity.text),
+      'vehicle_no': vehicleNumber.text,
+      'photo':"https://imgd-ct.aeplcdn.com/370x208/n/cw/ec/130591/fronx-exterior-right-front-three-quarter-109.jpeg?isig=0&q=80",
+      'vehicle_name': vehicleName.text,
     };
 
     try {
@@ -122,11 +126,15 @@ class _MyvehiclesState extends State<Myvehicles> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundImage: NetworkImage(
-                'https://images.unsplash.com/photo-1480455624313-e'
+            child: InkWell(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Profile(),));
+              },
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(Utils.photURL == null ? 'https://images.unsplash.com/photo-1480455624313-e'
                     '29b44bbfde1?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid='
-                    'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D',
+                    'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D': Utils.photURL.toString()),
+
               ),
             ),
           )
@@ -137,9 +145,17 @@ class _MyvehiclesState extends State<Myvehicles> {
         child: SafeArea(
           child: Column(
             children: [
-              Text(
-                'My Vehicles',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 23),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  IconButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, icon: Icon(Icons.arrow_back)),
+                  Text(
+                    'My Vehicles',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 23),
+                  ),
+                ],
               ),
               SizedBox(
                 height: 150,
@@ -161,7 +177,7 @@ class _MyvehiclesState extends State<Myvehicles> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: ListView.builder(
-                        itemCount: 1,
+                        itemCount: vehiclesDetailsmap.length,
                         itemBuilder: (context, index) {
                           print(vehiclesDetailsmap.length);
                           final vehicleDetail = vehiclesDetailsmap[index];

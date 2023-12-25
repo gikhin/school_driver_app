@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:school_driver/Homepages/Homepage.dart';
 import 'package:school_driver/Homepages/Scanner/qrscansmaple.dart';
 import 'package:http/http.dart' as http;
 import 'package:school_driver/Utils/Appurls/appurl.dart';
@@ -9,6 +10,7 @@ import 'package:school_driver/Utils/Utils.dart';
 
 import '../../Widgets/buttons.dart';
 import '../../constents.dart';
+import '../../forchange.dart';
 
 class Scanpage extends StatefulWidget {
   const Scanpage({Key? key}) : super(key: key);
@@ -20,18 +22,16 @@ class Scanpage extends StatefulWidget {
 class _ScanpageState extends State<Scanpage> {
 
   Future<void> endTrip() async {
-
-
     // Your request payload
     Map<String, dynamic> requestBody = {
-      "starting_stop": "kozhikode",
-      "status": "started",
-      "id": Utils.userLoggedId,
+      "ending_stop": "nadakkav",
+
+      "driver_id": Utils.userLoggedId,
     };
 
     try {
       final response = await http.post(
-        Uri.parse(AppUrl.checkOut),
+        Uri.parse(AppUrl.endTrip),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -63,53 +63,55 @@ class _ScanpageState extends State<Scanpage> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundImage: NetworkImage('https://images.unsplash.com/photo-1480455624313-e'
+            child:CircleAvatar(
+              backgroundImage: NetworkImage(Utils.photURL == null ? 'https://images.unsplash.com/photo-1480455624313-e'
                   '29b44bbfde1?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid='
-                  'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D'),
+                  'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D': Utils.photURL.toString()),
 
             ),
           )
         ],
         elevation: 0,
       ),
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              children: [
 
-              SizedBox(height: 130,),
-              InkWell(
-                onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>QrCodeSample(),));
-                },
-                child: Container(
+                SizedBox(height: 130,),
+                InkWell(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>QrCodeSample(),));
+                  },
+                  child: Container(
 
-                  decoration: BoxDecoration(
-                      color: scanColor2,
-                      borderRadius: BorderRadius.circular(200)
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Container(
-                      height: 184,
-                      width: 184,
-                      decoration: BoxDecoration(
-                          color: scanColor,
-                          borderRadius: BorderRadius.circular(100)
+                    decoration: BoxDecoration(
+                        color: scanColor2,
+                        borderRadius: BorderRadius.circular(200)
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Container(
+                        height: 184,
+                        width: 184,
+                        decoration: BoxDecoration(
+                            color: scanColor,
+                            borderRadius: BorderRadius.circular(100)
+                        ),
+                        child: Center(child: Text('Scan',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.bold),)),
                       ),
-                      child: Center(child: Text('Scan',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.bold),)),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 250,),
-              MyButtonWidget(buttonName: 'End Trip', bgColor: pinkColor,onPressed: (){
-                endTrip();
-
-              }),
-              SizedBox(height: 10,),
-            ],
+                SizedBox(height: 250,),
+                MyButtonWidget(buttonName: 'End Trip', bgColor: pinkColor,onPressed: (){
+                  endTrip();
+                  Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => Homepage(),));
+                }),
+                SizedBox(height: 10,),
+              ],
+            ),
           ),
         ),
       ),

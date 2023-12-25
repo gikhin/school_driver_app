@@ -1,4 +1,5 @@
 class AppUrl{
+  static const String gKey                   = "AIzaSyDHRPXjG2JvJmgU2PedeuXeWRIkfNu6xRg";
 
   static const String baseUrl = 'http://52.66.145.37:3005';
 
@@ -8,9 +9,9 @@ class AppUrl{
 
   static const String tripHistory = '$baseUrl/driver/total';
 
-  static const String addVehicles = '$baseUrl/driver/vehicle';
+  static const String addVehicles = '$baseUrl/driver/add_vehicle';
 
-  static const String myVehiclesProfile = '$baseUrl/driver/single_detail';
+  static const String myVehiclesProfile = '$baseUrl/driver/get_vehicle';
 
   static const String driverStarting = '$baseUrl/driver/master_trip';
 
@@ -31,5 +32,10 @@ class AppUrl{
   static const String addingNewStopsBydriver = '$baseUrl/driver/add_stops';
 
   static const String getNewStop = '$baseUrl/driver/get_stops';
+
+  static const String deleteTrip = '$baseUrl/driver/delete_trip';
+
+  //google sign in
+  static const String checkEmail = '$baseUrl/driver/google_signin';
 
 }

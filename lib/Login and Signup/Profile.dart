@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:school_driver/Utils/Utils.dart';
 
 import '../Homepages/Homepage.dart';
 import '../Utils/Appurls/appurl.dart';
@@ -34,7 +36,9 @@ class _ProfileState extends State<Profile> {
 
   Future<void> fetchUserData() async {
     final url = Uri.parse(AppUrl.myVehiclesProfile);
-    final requestBody = {"id": 4};
+    final requestBody = {
+      "id": Utils.userLoggedId
+    };
 
     try {
       final response = await http.post(
@@ -43,27 +47,20 @@ class _ProfileState extends State<Profile> {
         headers: {"Content-Type": "application/json"},
       );
 
-      print('URL: $url');
-      print('Request Body: ${jsonEncode(requestBody)}');
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
-        print('Response Status Code: ${response.statusCode}');
-        print('Response Body: ${response.body}');
+        setState(() {
+          print(data['data']);
+          userData = data['data'];
+          name.text = userData?['name'] ?? '';
+          print(userData?['name']);
+          phoneNumber.text = userData?['phone_no'] ?? '';
+          email.text = userData?['email'] ?? '';
+          vehicleNumber.text = userData?['vehicle_no'] ?? '';
+        });
 
-        if (!data['error'] && data['success']) {
-          setState(() {
-            userData = data['data'][0];
-            name.text = userData?['name'] ?? '';
-            phoneNumber.text = userData?['phone_no'] ?? '';
-            email.text = userData?['email'] ?? '';
-            vehicleNumber.text = userData?['vehicle_no'] ?? '';
-          });
-        } else {
-          print('Error fetching user data: ${data['message']}');
-          // Handle error - Update UI to indicate an error
-        }
+
       } else {
         print('HTTP request failed with status code: ${response.statusCode}');
         // Handle error - Update UI to indicate an error
@@ -77,15 +74,15 @@ class _ProfileState extends State<Profile> {
   Future<void> saveUserData() async {
     final url = Uri.parse(AppUrl.editDriver);
     final requestBody = {
-      "driver_id": 4,
+      "driver_id": Utils.userLoggedId,
       "name": name.text,
       "email": email.text,
       "vehicle_no": vehicleNumber.text,
-      "phone_no": phoneNumber.text,
+      "phone": phoneNumber.text,
     };
 
     try {
-      final response = await http.post(
+      final response = await http.put(
         url,
         body: jsonEncode(requestBody),
         headers: {"Content-Type": "application/json"},
@@ -98,6 +95,8 @@ class _ProfileState extends State<Profile> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => Homepage(),));
+        Fluttertoast.showToast(msg: 'Updated Successfully');
         // Handle response data accordingly
       } else {
         print('HTTP request failed with status code: ${response.statusCode}');
@@ -112,6 +111,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: Icon(Icons.menu, color: textColor1),
@@ -126,8 +126,10 @@ class _ProfileState extends State<Profile> {
                 );
               },
               child: CircleAvatar(
-                backgroundColor: checkIncolor,
-                child: Icon(Icons.home_filled, color: Colors.white),
+                backgroundImage: NetworkImage(Utils.photURL == null ? 'https://images.unsplash.com/photo-1480455624313-e'
+                    '29b44bbfde1?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid='
+                    'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D': Utils.photURL.toString()),
+
               ),
             ),
           )
@@ -138,10 +140,25 @@ class _ProfileState extends State<Profile> {
         child: SafeArea(
           child: Column(
             children: [
-              SizedBox(height: 20),
               Row(
                 children: [
-                  CircleAvatar(radius: 45),
+                  IconButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, icon: Icon(Icons.arrow_back,color: Colors.black,)),
+                  Text('Profile',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black,fontSize: 18),),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+              CircleAvatar(
+                radius: 45,
+              backgroundImage: NetworkImage(Utils.photURL == null ? 'https://images.unsplash.com/photo-1480455624313-e'
+              '29b44bbfde1?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid='
+              'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D': Utils.photURL.toString()),
+
+    ),
                   SizedBox(
                     width: 225,
                     child: MyTextFieldWidget(
@@ -176,7 +193,7 @@ class _ProfileState extends State<Profile> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     SizedBox(
                       height: 52,
@@ -185,6 +202,7 @@ class _ProfileState extends State<Profile> {
                         buttonName: "Log out",
                         bgColor: pinkColor,
                         onPressed: () {
+                          Utils.signoutgoogle(context);
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (context) => Loginpage()),

@@ -35,6 +35,21 @@ dependencies:
   fluttertoast: ^8.2.4
   http: ^0.13.3
   geolocator: ^9.0.2
+  another_flushbar: ^1.12.29
+  lottie: ^2.7.0
+  google_fonts:
+  cloud_firestore:
+  firebase_core:
+  firebase_auth:
+  google_sign_in: ^6.1.5
+  google_sign_in_android: ^6.1.20
+  geocoding:
+  google_maps_flutter:
+  google_places_flutter:
+  uuid:
+
+
+
 
 
 
@@ -69,7 +84,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+  - assets/login.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

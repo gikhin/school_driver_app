@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:school_driver/Homepages/Scanner/QR_scanner.dart';
 import 'package:school_driver/Homepages/Scanner/qrscansmaple.dart';
 import 'package:school_driver/Homepages/Trips/my_trips.dart';
+import 'package:school_driver/Homepages/Trips/mytripsnew.dart';
 import 'package:school_driver/Homepages/Trips/startTrip.dart';
 import 'package:school_driver/Login%20and%20Signup/Profile.dart';
 import 'package:school_driver/Utils/Appurls/appurl.dart';
@@ -21,6 +22,14 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   List<dynamic> tripDetails = [];
+
+  String capitalize(String s) {
+    if (s == null || s.isEmpty) {
+      return s;
+    }
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
 
   Future<void> tripHistoryFunction( ) async {
     print('caaleddd....');
@@ -75,9 +84,9 @@ class _HomepageState extends State<Homepage> {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => Profile(),));
                 },
                 child: CircleAvatar(
-                  backgroundImage: NetworkImage('https://images.unsplash.com/photo-1480455624313-e'
+                  backgroundImage: NetworkImage(Utils.photURL == null ? 'https://images.unsplash.com/photo-1480455624313-e'
                       '29b44bbfde1?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid='
-                      'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D'),
+                      'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D': Utils.photURL.toString()),
 
                 ),
               ),
@@ -102,13 +111,22 @@ class _HomepageState extends State<Homepage> {
                             fontWeight: FontWeight.bold,
                             fontSize: 18),
                       ),
+                      // Text(
+                      //   '${Utils.userLoggedName.toString()}',
+                      //   style: TextStyle(
+                      //       color: openScanner,
+                      //       fontWeight: FontWeight.bold,
+                      //       fontSize: 18),
+                      // ),
                       Text(
-                        'Anwer ',
+                        '${capitalize(Utils.userLoggedName.toString())}',
                         style: TextStyle(
-                            color: openScanner,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18),
+                          color: openScanner,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
+
                     ],
                   ),
                 ),
@@ -237,8 +255,11 @@ class _HomepageState extends State<Homepage> {
                 SizedBox(
                   height: 10,
                 ),
-                Text(
-                  'Trip History',
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: Text(
+                    'Trip History',
+                  ),
                 ),
                 Expanded(
                   child: ListView.builder(
@@ -302,19 +323,26 @@ class _HomepageState extends State<Homepage> {
                               height: 55,
                               width: 330,
                               child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: openScanner),
-                                  onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>Scanpage(),));
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      'Open scanner',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  )),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                  tripDetail['status'] == 'reached' ? startTripColor : openScanner,
+                                ),
+                                onPressed: () {
+                                  if (tripDetail['status'] != 'reached') {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => Scanpage()),
+                                    );
+                                  }
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    tripDetail['status'] == 'reached' ? 'Start Again' : 'Open Scanner',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         );
