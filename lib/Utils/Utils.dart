@@ -12,7 +12,7 @@ import 'package:school_driver/Homepages/Homepage.dart';
 import 'Appurls/appurl.dart';
 
 class Utils{
-  static var link;
+  static var link ;
   static int? userLoggedId ;
   static String? userLoggedName;
   static String? userLoggedEmail;

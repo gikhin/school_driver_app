@@ -91,7 +91,7 @@ class _LoginpageState extends State<Loginpage> {
                   Text('Sign in with google'),
                   IconButton(onPressed: () {
                     Utils.signInWithGoogle(context);
-                  }, icon: Image.network('https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png')),
+                  }, icon: Image.asset('assets/googleic.png')),
                 ],
               )
             ],

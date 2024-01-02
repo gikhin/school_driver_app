@@ -13,6 +13,10 @@ class AppUrl{
 
   static const String myVehiclesProfile = '$baseUrl/driver/get_vehicle';
 
+  static const String driverProfile = '$baseUrl/driver/single_detail';
+
+  static const String editDriver = '$baseUrl/driver/edit_driver';
+
   static const String driverStarting = '$baseUrl/driver/master_trip';
 
   static const String driverStop = '$baseUrl/driver/stops';
@@ -27,13 +31,15 @@ class AppUrl{
 
   static const String driverTotal = '$baseUrl/driver/total';
 
-  static const String editDriver = '$baseUrl/driver/edit_driver';
-
   static const String addingNewStopsBydriver = '$baseUrl/driver/add_stops';
 
   static const String getNewStop = '$baseUrl/driver/get_stops';
 
-  static const String deleteTrip = '$baseUrl/driver/delete_trip';
+
+
+  static const String addCoordinates = '$baseUrl/driver/location';
+
+  static const String deletingTrip = '$baseUrl/driver/delete_stop';
 
   //google sign in
   static const String checkEmail = '$baseUrl/driver/google_signin';

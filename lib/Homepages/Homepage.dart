@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:school_driver/Homepages/Scanner/QR_scanner.dart';
 import 'package:school_driver/Homepages/Scanner/qrscansmaple.dart';
@@ -13,6 +15,8 @@ import 'package:school_driver/Utils/Utils.dart';
 import 'package:school_driver/Vehicles/My_vehicles.dart';
 import 'package:school_driver/constents.dart';
 
+import 'Trips/my_trips with map.dart';
+
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
 
@@ -21,6 +25,8 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  late Position _currentPosition;
+
   List<dynamic> tripDetails = [];
 
   String capitalize(String s) {
@@ -30,28 +36,34 @@ class _HomepageState extends State<Homepage> {
     return s[0].toUpperCase() + s.substring(1);
   }
 
-
-  Future<void> tripHistoryFunction( ) async {
+  Future<void> tripHistoryFunction() async {
     print('caaleddd....');
-    Map<String, dynamic> data ={
-      'id':Utils.userLoggedId
-    };
+    Map<String, dynamic> data = {'id': Utils.userLoggedId};
     final response = await http.post(
       Uri.parse(AppUrl.tripHistory),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-
       },
       body: jsonEncode(data),
     );
-    print(response);
     print(response.statusCode);
     if (response.statusCode == 200) {
       var responsedata = jsonDecode(response.body);
       print(responsedata['data']);
+      List<dynamic> completeDriverTrips =
+          responsedata['data']['complete_drivertrips'];
+      for (var trip in completeDriverTrips) {
+        print('Trip ID: ${trip['id']}');
+        print('Starting Stop: ${trip['starting_stop']}');
+        print('Ending Stop: ${trip['ending_stop']}');
+        print('Status: ${trip['status']}');
+        print('Driver Check-in: ${trip['driver_checkin']}');
+        print('Driver Checkout: ${trip['driver_checkout']}');
+        print('Driver ID: ${trip['driver_id']}');
+      }
       setState(() {
         tripDetails.clear();
-        tripDetails.addAll(responsedata['data']);
+        tripDetails.addAll(completeDriverTrips);
       });
       print('hey....');
       // Successful API call
@@ -63,31 +75,117 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
+  //function to get current location
+  Future<void> _getCurrentLocation() async {
+    print('get current location is called....');
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        _currentPosition = position;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _startLocationUpdates() {
+    const oneMinute = Duration(minutes: 1);
+    Timer.periodic(oneMinute, (Timer timer) {
+      _getCurrentLocation();
+      uploadCordinates();
+    });
+  }
+
+  Future<void> uploadCordinates() async {
+    print('uploading cordinates....');
+    Map<String, dynamic> data = {
+      'driver_id': Utils.userLoggedId,
+      'latitude': _currentPosition.latitude.toString(),
+      'longitude': _currentPosition.longitude.toString()
+    };
+    final response = await http.post(
+      Uri.parse(AppUrl.addCoordinates),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+    print(jsonEncode(data));
+    print(response);
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      print('upload coordinates is successfully....');
+      // Successful API call
+      print('API Response: ${response.body}');
+    } else {
+      // Error handling
+      print('Error - Status Code: ${response.statusCode}');
+      print('Error - Response Body: ${response.body}');
+    }
+  }
+
+  Future<void> _checkLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      await _requestLocationPermission();
+    } else if (permission == LocationPermission.deniedForever) {
+      // Handle case where user denied permission permanently
+      // You might want to redirect the user to settings
+      // to enable location manually
+    } else {
+      _startLocationUpdates();
+    }
+  }
+
+  Future<void> _requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Handle case where user denied permission
+      // You may display a dialog or message to explain why
+    } else if (permission == LocationPermission.deniedForever) {
+      // Handle case where user denied permission permanently
+      // You might want to redirect the user to settings
+      // to enable location manually
+    } else {
+      _startLocationUpdates();
+    }
+  }
+
   @override
   void initState() {
+    _checkLocationPermission();
+    _getCurrentLocation();
+    _startLocationUpdates();
     // TODO: implement initState
     tripHistoryFunction();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          leading: Icon(Icons.menu, color: textColor1),
+          // leading: Icon(Icons.menu, color: textColor1),
           actions: [
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: InkWell(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => Profile(),));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Profile(),
+                      ));
                 },
                 child: CircleAvatar(
-                  backgroundImage: NetworkImage(Utils.photURL == null ? 'https://images.unsplash.com/photo-1480455624313-e'
-                      '29b44bbfde1?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid='
-                      'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D': Utils.photURL.toString()),
-
+                  backgroundImage: NetworkImage(Utils.photURL == null
+                      ? 'https://images.unsplash.com/photo-1480455624313-e'
+                          '29b44bbfde1?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid='
+                          'M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWFsZSUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D'
+                      : Utils.photURL.toString()),
                 ),
               ),
             )
@@ -126,7 +224,6 @@ class _HomepageState extends State<Homepage> {
                           fontSize: 18,
                         ),
                       ),
-
                     ],
                   ),
                 ),
@@ -189,7 +286,11 @@ class _HomepageState extends State<Homepage> {
                             ),
                             onPressed: () {
                               setState(() {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => SelectTrip(),));
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SelectTrip(),
+                                    ));
                               });
                             },
                             child: Padding(
@@ -238,7 +339,11 @@ class _HomepageState extends State<Homepage> {
                               ),
                             ),
                             onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => MyTrips(),));
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MyTrips(),
+                                  ));
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -275,7 +380,7 @@ class _HomepageState extends State<Homepage> {
                               child: Card(
                                 child: SizedBox(
                                   height: 112.5,
-                                  width: 324.875,
+                                  // width: 324.875,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Column(
@@ -287,11 +392,16 @@ class _HomepageState extends State<Homepage> {
                                                 Icons.school_outlined,
                                                 color: Colors.blue,
                                               ),
-                                              Padding(
-                                                  padding:
-                                                  const EdgeInsets.all(8.0),
+                                              Flexible(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(8.0),
                                                   child: Text(
-                                                      '${tripDetail['starting_stop'].toString().toUpperCase()}')
+                                                    '${tripDetail['starting_stop'].toString().toUpperCase()}',
+                                                    overflow: TextOverflow.ellipsis,
+                                                    maxLines: 1,
+                                                    softWrap: false,
+                                                  ),
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -303,9 +413,9 @@ class _HomepageState extends State<Homepage> {
                                               ),
                                               Padding(
                                                 padding:
-                                                const EdgeInsets.all(8.0),
+                                                    const EdgeInsets.all(8.0),
                                                 child: Text(
-                                                  '${tripDetail['ending_stop'].toString().toUpperCase()}',
+                                                tripDetail['ending_stop'] == null ? 'Final stop' :'${tripDetail['ending_stop'].toString().toUpperCase()}',
                                                   style: TextStyle(
                                                       color: Colors.black),
                                                 ),
@@ -325,21 +435,35 @@ class _HomepageState extends State<Homepage> {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
-                                  tripDetail['status'] == 'reached' ? startTripColor : openScanner,
+                                      tripDetail['status'] == 'reached'
+                                          ? startTripColor
+                                          : openScanner,
                                 ),
                                 onPressed: () {
                                   if (tripDetail['status'] != 'reached') {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => Scanpage()),
+                                      MaterialPageRoute(
+                                          builder: (context) => Scanpage(
+                                                tripID: tripDetail['id'],
+                                              )),
                                     );
+                                  }else if(tripDetail['status'] == 'reached'){
+                                    print('end stop is:${tripDetail['ending_stop']}');
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => Scanpage(
+                                        tripID: tripDetail['id'],
+                                      endstop: tripDetail['ending_stop'],
+                                    ),));
                                   }
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
-                                    tripDetail['status'] == 'reached' ? 'Start Again' : 'Open Scanner',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    tripDetail['status'] == 'reached'
+                                        ? 'Start Again'
+                                        : 'Open Scanner',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ),
