@@ -226,7 +226,7 @@ class _HomepageState extends State<Homepage> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          leading: Icon(Icons.menu, color: textColor1),
+
           actions: [
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -333,7 +333,147 @@ class _HomepageState extends State<Homepage> {
                               ),
                             ),
                           ),
-
+                          // Column(
+                          //   children: [
+                          //     isVehicle == true
+                          //         ? SizedBox(
+                          //             height: 45,
+                          //             width: 195,
+                          //             child: ElevatedButton(
+                          //               style: ElevatedButton.styleFrom(
+                          //                 backgroundColor: startTripColor,
+                          //                 shape: RoundedRectangleBorder(
+                          //                   borderRadius:
+                          //                       BorderRadius.circular(6.0),
+                          //                 ),
+                          //               ),
+                          //               onPressed: () {
+                          //                 setState(() {
+                          //                   Navigator.push(
+                          //                       context,
+                          //                       MaterialPageRoute(
+                          //                         builder: (context) =>
+                          //                             SelectTrip(),
+                          //                       ));
+                          //                 });
+                          //               },
+                          //               child: Padding(
+                          //                 padding: const EdgeInsets.all(8.0),
+                          //                 child: Text('Start Trip',
+                          //                     style: TextStyle(
+                          //                         fontWeight: FontWeight.bold)),
+                          //               ),
+                          //             ),
+                          //           )
+                          //         : SizedBox(
+                          //             height: 45,
+                          //             width: 195,
+                          //             child: ElevatedButton(
+                          //               style: ElevatedButton.styleFrom(
+                          //                 backgroundColor: addvehicleColor,
+                          //                 shape: RoundedRectangleBorder(
+                          //                   borderRadius:
+                          //                       BorderRadius.circular(6.0),
+                          //                 ),
+                          //               ),
+                          //               onPressed: () {
+                          //                 setState(() {
+                          //                   Navigator.push(
+                          //                       context,
+                          //                       MaterialPageRoute(
+                          //                         builder: (context) =>
+                          //                             Myvehicles(),
+                          //                       ));
+                          //                 });
+                          //               },
+                          //               child: Padding(
+                          //                 padding: const EdgeInsets.all(8.0),
+                          //                 child: Text('Add Vehicle',
+                          //                     style: TextStyle(
+                          //                         fontWeight: FontWeight.bold)),
+                          //               ),
+                          //             ),
+                          //           ),
+                          //     SizedBox(height: 20),
+                          //     SizedBox(
+                          //       height: 45,
+                          //       width: 195,
+                          //       child: ElevatedButton(
+                          //         style: ElevatedButton.styleFrom(
+                          //           backgroundColor: checkIncolor,
+                          //           shape: RoundedRectangleBorder(
+                          //             borderRadius: BorderRadius.circular(6.0),
+                          //           ),
+                          //         ),
+                          //         onPressed: () {
+                          //           Navigator.push(
+                          //               context,
+                          //               MaterialPageRoute(
+                          //                 builder: (context) => Myvehicles(),
+                          //               ));
+                          //         },
+                          //         child: Padding(
+                          //           padding: const EdgeInsets.all(8.0),
+                          //           child: Text('My Vehicles',
+                          //               style: TextStyle(
+                          //                   fontWeight: FontWeight.bold)),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //     SizedBox(height: 20),
+                          //     isTrip == true
+                          //         ? SizedBox(
+                          //             height: 45,
+                          //             width: 195,
+                          //             child: ElevatedButton(
+                          //               style: ElevatedButton.styleFrom(
+                          //                 backgroundColor: pinkColor,
+                          //                 shape: RoundedRectangleBorder(
+                          //                   borderRadius:
+                          //                       BorderRadius.circular(6.0),
+                          //                 ),
+                          //               ),
+                          //               onPressed: () {
+                          //                 Navigator.push(
+                          //                     context,
+                          //                     MaterialPageRoute(
+                          //                       builder: (context) => MyTrips(),
+                          //                     ));
+                          //               },
+                          //               child: Padding(
+                          //                 padding: const EdgeInsets.all(8.0),
+                          //                 child: Text('My Trips',
+                          //                     style: TextStyle(
+                          //                         fontWeight: FontWeight.bold)),
+                          //               ),
+                          //             ),
+                          //           )
+                          //         : SizedBox(
+                          //             height: 45,
+                          //             width: 195,
+                          //             child: ElevatedButton(
+                          //               style: ElevatedButton.styleFrom(
+                          //                 backgroundColor: pinkColorLight,
+                          //                 shape: RoundedRectangleBorder(
+                          //                   borderRadius:
+                          //                       BorderRadius.circular(6.0),
+                          //                 ),
+                          //               ),
+                          //               onPressed: () {
+                          //                 Fluttertoast.showToast(
+                          //                     msg: 'Add Vehicle First !');
+                          //                 // Navigator.push(context, MaterialPageRoute(builder: (context) => MyTrips(),));
+                          //               },
+                          //               child: Padding(
+                          //                 padding: const EdgeInsets.all(8.0),
+                          //                 child: Text('Add Trips',
+                          //                     style: TextStyle(
+                          //                         fontWeight: FontWeight.bold)),
+                          //               ),
+                          //             ),
+                          //           ),
+                          //   ],
+                          // ),
                           Column(
                             children: [
                               vehicleslist.length == 0

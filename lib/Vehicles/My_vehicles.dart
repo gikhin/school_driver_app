@@ -278,81 +278,86 @@ class _MyvehiclesState extends State<Myvehicles> {
                     }
                     return false;
                   },
-                  child: PageView.builder(
-                      controller: _pageController,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: vehiclesDetails.length,
-                      itemBuilder: (context, index) {
-                        return Row(
-                          children: [
-                            Container(
-                                height: 120,
-                                width: 120,
-                                child: Image.network(
-                                    '${vehiclesDetails[index]['photo'].toString()}')),
-                            SizedBox(width: 25.0,),
-                            Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Stack(
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment:MainAxisAlignment.spaceAround,
+                  child: FutureBuilder(
+                    future:vehicleHistory(),
+                    builder: (context,snapshot) {
+                      return PageView.builder(
+                          controller: _pageController,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: vehiclesDetails.length,
+                          itemBuilder: (context, index) {
+                            return Row(
+                              children: [
+                                Container(
+                                    height: 120,
+                                    width: 120,
+                                    child: Image.network(
+                                        '${vehiclesDetails[index]['photo'].toString()}')),
+                                SizedBox(width: 25.0,),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Stack(
                                     children: [
-                                      // Text('vehicle Name:${vehiclesDetails[0]}'),
-                                      Text(
-                                        'Vehicle Name:${vehiclesDetails[index]['vehicle_name'].toString().toUpperCase()}',
-                                        style: TextStyle(fontWeight: FontWeight.bold),),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment:MainAxisAlignment.spaceAround,
+                                        children: [
+                                          // Text('vehicle Name:${vehiclesDetails[0]}'),
+                                          Text(
+                                            'Vehicle Name:${vehiclesDetails[index]['vehicle_name'].toString().toUpperCase()}',
+                                            style: TextStyle(fontWeight: FontWeight.bold),),
 
 
-                                      Text(
-                                        'Vehicle Number:${vehiclesDetails[index]['vehicle_no'].toString().toUpperCase()}',
-                                        style: TextStyle(fontWeight: FontWeight.bold),),
-                                      Text(
-                                        'Seat Capacity:${vehiclesDetails[index]['seat_capacity']}',style: TextStyle(
-                                          fontWeight: FontWeight.bold
-                                      ),),
-                                      SizedBox(
-                                        width:100,
-                                        child: MyButtonWidget(buttonName: 'Edit',
-                                            bgColor: scanColor,
-                                            onPressed: (){
-                                              print('pressed edit icon.....');
-                                                Navigator.push(context, MaterialPageRoute(builder: (context) => EditVehicle(vehicle_id:int.parse(vehiclesDetails[index]['id'].toString())),));
-                                            }),
+                                          Text(
+                                            'Vehicle Number:${vehiclesDetails[index]['vehicle_no'].toString().toUpperCase()}',
+                                            style: TextStyle(fontWeight: FontWeight.bold),),
+                                          Text(
+                                            'Seat Capacity:${vehiclesDetails[index]['seat_capacity']}',style: TextStyle(
+                                              fontWeight: FontWeight.bold
+                                          ),),
+                                          SizedBox(
+                                            width:100,
+                                            child: MyButtonWidget(buttonName: 'Edit',
+                                                bgColor: scanColor,
+                                                onPressed: (){
+                                                  print('pressed edit icon.....');
+                                                    Navigator.push(context, MaterialPageRoute(builder: (context) => EditVehicle(vehicle_id:int.parse(vehiclesDetails[index]['id'].toString())),));
+                                                }),
+                                          ),
+                                          SizedBox(height: 20,),
+                                          // ElevatedButton(onPressed: (){
+                                          //   print('pressed edit icon.....');
+                                          //   Navigator.push(context, MaterialPageRoute(builder: (context) => EditVehicle(vehicle_id:vehiclesDetails[index]['id']),));
+                                          // }, child: Text('Edit'))
+                                        ],
                                       ),
-                                      SizedBox(height: 20,),
-                                      // ElevatedButton(onPressed: (){
-                                      //   print('pressed edit icon.....');
-                                      //   Navigator.push(context, MaterialPageRoute(builder: (context) => EditVehicle(vehicle_id:vehiclesDetails[index]['id']),));
-                                      // }, child: Text('Edit'))
+                                      // Positioned(
+                                      //   top:100,
+                                      //   bottom:100,
+                                      //   child: Align(
+                                      //     child: Padding(
+                                      //         padding: const EdgeInsets.only(bottom: 8.0),
+                                      //         child: Container(
+                                      //             decoration: BoxDecoration(
+                                      //               color: scanColor,
+                                      //             ),
+                                      //             child: InkWell(
+                                      //               onTap: (){
+                                      //                 print('pressed edit icon.....');
+                                      //                 Navigator.push(context, MaterialPageRoute(builder: (context) => EditVehicle(vehicle_id:int.parse(vehiclesDetails[index]['id'].toString())),));
+                                      //               },
+                                      //                 child: Icon(Icons.edit)))
+                                      //     ),
+                                      //   ),
+                                      // ),
                                     ],
                                   ),
-                                  // Positioned(
-                                  //   top:100,
-                                  //   bottom:100,
-                                  //   child: Align(
-                                  //     child: Padding(
-                                  //         padding: const EdgeInsets.only(bottom: 8.0),
-                                  //         child: Container(
-                                  //             decoration: BoxDecoration(
-                                  //               color: scanColor,
-                                  //             ),
-                                  //             child: InkWell(
-                                  //               onTap: (){
-                                  //                 print('pressed edit icon.....');
-                                  //                 Navigator.push(context, MaterialPageRoute(builder: (context) => EditVehicle(vehicle_id:int.parse(vehiclesDetails[index]['id'].toString())),));
-                                  //               },
-                                  //                 child: Icon(Icons.edit)))
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                ],
-                              ),
-                            )
-                          ],
-                        );
-                      }),
+                                )
+                              ],
+                            );
+                          });
+                    }
+                  ),
                 ),
               ),
               Align(

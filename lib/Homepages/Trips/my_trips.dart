@@ -84,7 +84,7 @@ class _MyTripsState extends State<MyTrips> {
     };
     try {
       print('its tryed....');
-      print('body is::${jsonEncode(data)}');
+      print('body is:${jsonEncode(data)}');
       final response = await http.post(
         Uri.parse(AppUrl.getNewStop),
         headers: <String, String>{
@@ -448,7 +448,7 @@ class _MyTripsState extends State<MyTrips> {
                                           title: Text('${drivertrips[index]['stop'][subIndex]}' ?? ''),
                                         );
                                       } else {
-                                        return SizedBox.shrink(); // or any other placeholder widget
+                                        return SizedBox.shrink();
                                       }
                                     },
                                   )
@@ -466,7 +466,7 @@ class _MyTripsState extends State<MyTrips> {
                                     child: ElevatedButton(
                                       style: ElevatedButton.styleFrom(backgroundColor: pinkColor),
                                       onPressed: () {
-                                        print("Clickeeeeed");
+
                                         print('ddddddd:${drivertrips[index]['id']}');
                                         print('delete btn clicked');
                                         deletetrip(int.parse(drivertrips[index]['id'].toString()));
@@ -801,6 +801,7 @@ class Stop{
   String name;
   String latitude;
   String longitude;
+
 
   Stop({required this.name,required this.latitude, required this.longitude});
 

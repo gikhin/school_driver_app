@@ -90,7 +90,7 @@ class _ScanpageState extends State<Scanpage> {
                   );
                 }
               },
-              child: Text('Exit'),
+              child: Text('End Trip'),
             ),
           ],
         ),
