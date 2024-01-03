@@ -12,6 +12,7 @@ Color scanColor = Color.fromRGBO(46, 196, 182, 1);
 Color scanColor2 = Color.fromRGBO(46, 196, 182, 0.3);
 
 Color pinkColor = Color.fromRGBO(255, 71, 126, 1);
+Color pinkColorLight = Color.fromRGBO(231, 134, 163, 0.6627450980392157);
 
 Color lightWhite = Color.fromRGBO(0, 0, 0, 0.11);
 
@@ -20,5 +21,7 @@ Color openScanner = Color.fromRGBO(118, 120, 237, 1);
 Color fillColor = Color.fromRGBO(217, 217, 217, 0.84);
 
 Color startTripColor = Color.fromRGBO(2, 195, 154, 1);
+Color startTripColorlight = Color.fromRGBO(125, 194, 179, 1.0);
+Color addvehicleColor = Color.fromRGBO(0, 66, 55, 1.0);
 
 TextStyle text_style = TextStyle(fontFamily: 'Quick Sand');

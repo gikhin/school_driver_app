@@ -2,20 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:school_driver/Homepages/Scanner/QR_scanner.dart';
 import 'package:school_driver/Homepages/Scanner/qrscansmaple.dart';
 import 'package:school_driver/Homepages/Trips/my_trips.dart';
-import 'package:school_driver/Homepages/Trips/mytripsnew.dart';
+// import 'package:school_driver/Homepages/Trips/mytripsnew.dart';
 import 'package:school_driver/Homepages/Trips/startTrip.dart';
 import 'package:school_driver/Login%20and%20Signup/Profile.dart';
 import 'package:school_driver/Utils/Appurls/appurl.dart';
 import 'package:school_driver/Utils/Utils.dart';
 import 'package:school_driver/Vehicles/My_vehicles.dart';
 import 'package:school_driver/constents.dart';
-
-import 'Trips/my_trips with map.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
@@ -28,6 +27,12 @@ class _HomepageState extends State<Homepage> {
   late Position _currentPosition;
 
   List<dynamic> tripDetails = [];
+
+  List<dynamic> tripslist = [];
+  List<dynamic> vehicleslist = [];
+
+  bool isVehicle = true;
+  bool isTrip = true;
 
   String capitalize(String s) {
     if (s == null || s.isEmpty) {
@@ -105,7 +110,7 @@ class _HomepageState extends State<Homepage> {
       'longitude': _currentPosition.longitude.toString()
     };
     final response = await http.post(
-      Uri.parse(AppUrl.addCoordinates),
+      Uri.parse(AppUrl.addCordinates),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -135,6 +140,59 @@ class _HomepageState extends State<Homepage> {
       // to enable location manually
     } else {
       _startLocationUpdates();
+    }
+  }
+
+  Future<void> checkingNewUser() async {
+    print('checkingNewUser api is:${AppUrl.checkingNewUser}');
+    Map<String, dynamic> bodydata = {"driver_id": Utils.userLoggedId};
+    final response = await http.post(
+      Uri.parse(AppUrl.checkingNewUser),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(bodydata),
+    );
+
+    if (response.statusCode == 200) {
+      var responseData = jsonDecode(response.body);
+      setState(() {
+        tripslist.clear();
+        vehicleslist.clear();
+        tripslist = responseData['data']['find_addedStop'];
+        vehicleslist = responseData['data']['driver_vehicle'];
+        print('tripsList:${tripslist}');
+        print('vehicleslist:${vehicleslist}');
+        print('driver_vehicle:${responseData['data']['driver_vehicle']}');
+        print(
+            'driver_vehicle length is:${responseData['data']['driver_vehicle'].length}');
+        print(
+            'added stop length:${responseData['data']['find_addedStop'].length}');
+        if (responseData['data']['driver_vehicle'].length <= 0) {
+          print('length is zero');
+          isVehicle = false;
+          isTrip = false;
+          print('isvehicle values :${isVehicle}');
+        } else {
+          isVehicle = true;
+          isTrip = true;
+        }
+        if (responseData['data']['find_addedStop'].length <= 0) {
+          isTrip = false;
+          print('isTrip values :${isTrip}');
+        } else {
+          isTrip = true;
+        }
+        print('555555555555555555');
+      });
+
+      print('responseData of checking Driver is: ${responseData}');
+      print('POST request successful!');
+      print('Response: ${response.body}');
+    } else {
+      print('6666666666');
+      print('POST request failed with status: ${response.statusCode}');
+      print('Response: ${response.body}');
     }
   }
 
@@ -168,7 +226,7 @@ class _HomepageState extends State<Homepage> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          // leading: Icon(Icons.menu, color: textColor1),
+          leading: Icon(Icons.menu, color: textColor1),
           actions: [
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -253,110 +311,221 @@ class _HomepageState extends State<Homepage> {
                 SizedBox(
                   height: 20,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        child: Image.network(
-                          'https://plus.unsplash.com/premium_photo-1670491584909-fad9d3a4f66d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3w'
-                          'xMjA3fDB8MHxzZWFyY2h8MTN8fHNjaG9vbCUyMGJ1c3xlbnwwfHwwfHx8MA%3D%3D',
-                          fit: BoxFit.cover,
-                        ),
-                        height: 180,
-                        width: 130,
-                        decoration: BoxDecoration(
-                          color: scanColor2,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 45,
-                          width: 195,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: startTripColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6.0),
+                FutureBuilder(
+                    future: checkingNewUser(),
+                    builder: (context, snapshot) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              child: Image.network(
+                                'https://plus.unsplash.com/premium_photo-1670491584909-fad9d3a4f66d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3w'
+                                'xMjA3fDB8MHxzZWFyY2h8MTN8fHNjaG9vbCUyMGJ1c3xlbnwwfHwwfHx8MA%3D%3D',
+                                fit: BoxFit.cover,
+                              ),
+                              height: 180,
+                              width: 130,
+                              decoration: BoxDecoration(
+                                color: scanColor2,
+                                borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: () {
-                              setState(() {
+                          ),
+
+                          Column(
+                            children: [
+                              vehicleslist.length == 0
+                                  ? SizedBox(
+                                  height: 45,
+                                  width: 195,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: addvehicleColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(6.0),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Myvehicles(),
+                                            ));
+                                      });
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text('Add Vehicle',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
+                                )
+                                  : tripslist.length ==0
+                                  ? SizedBox(
+                                  height: 45,
+                                  width: 195,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: startTripColorlight,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(6.0),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Fluttertoast.showToast(msg: 'Add Trip First !');
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text('Start Trip',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
+                                )
+                                  :SizedBox(
+                                  height: 45,
+                                  width: 195,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: startTripColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(6.0),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SelectTrip(),
+                                            ));
+                                      });
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text('Start Trip',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
+                                ),
+                      SizedBox(height: 20.0,),
+                      SizedBox(
+                            height: 45,
+                            width: 195,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: checkIncolor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                              ),
+                              onPressed: () {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => SelectTrip(),
+                                      builder: (context) => Myvehicles(),
                                     ));
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text('Start Trip',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        SizedBox(
-                          height: 45,
-                          width: 195,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: checkIncolor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6.0),
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('My Vehicles',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold)),
                               ),
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Myvehicles(),
-                                  ));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text('My Vehicles',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            ),
                           ),
-                        ),
-                        SizedBox(height: 20),
-                        SizedBox(
-                          height: 45,
-                          width: 195,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: pinkColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6.0),
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MyTrips(),
-                                  ));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text('My Trips',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            ),
+                              SizedBox(height: 20.0,),
+                              vehicleslist.length == 0
+                                  ? SizedBox(
+                                height: 45,
+                                width: 195,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: pinkColorLight,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.circular(6.0),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Fluttertoast.showToast(
+                                        msg: 'Add Vehicle First !');
+                                    // Navigator.push(context, MaterialPageRoute(builder: (context) => MyTrips(),));
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text('Add Trips',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                              )
+                                  : tripslist.length == 0
+                                      ? SizedBox(
+                                  height: 45,
+                                  width: 195,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: pinkColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(6.0),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      // Fluttertoast.showToast(
+                                      //     msg: 'Add Vehicle First !');
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => MyTrips(),));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text('Add Trips',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
+                                )
+                                      : SizedBox(
+                                  height: 45,
+                                  width: 195,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: pinkColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(6.0),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => MyTrips(),
+                                          ));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text('My Trips',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
+                                )
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                        ],
+                      );
+                    }),
                 SizedBox(
                   height: 10,
                 ),
@@ -380,7 +549,7 @@ class _HomepageState extends State<Homepage> {
                               child: Card(
                                 child: SizedBox(
                                   height: 112.5,
-                                  // width: 324.875,
+                                  width: 324.875,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Column(
@@ -392,17 +561,11 @@ class _HomepageState extends State<Homepage> {
                                                 Icons.school_outlined,
                                                 color: Colors.blue,
                                               ),
-                                              Flexible(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
+                                              Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
                                                   child: Text(
-                                                    '${tripDetail['starting_stop'].toString().toUpperCase()}',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    maxLines: 1,
-                                                    softWrap: false,
-                                                  ),
-                                                ),
-                                              ),
+                        tripDetail['starting_stop'] == null? 'Starting stop' : '${tripDetail['starting_stop'].toString().toUpperCase().split(',')[0]}')),
                                             ],
                                           ),
                                           subtitle: Row(
@@ -415,7 +578,7 @@ class _HomepageState extends State<Homepage> {
                                                 padding:
                                                     const EdgeInsets.all(8.0),
                                                 child: Text(
-                                                tripDetail['ending_stop'] == null ? 'Final stop' :'${tripDetail['ending_stop'].toString().toUpperCase()}',
+                                                  tripDetail['ending_stop'] == null? 'Ending stop' :  '${tripDetail['ending_stop'].toString().toUpperCase()}',
                                                   style: TextStyle(
                                                       color: Colors.black),
                                                 ),
@@ -448,12 +611,6 @@ class _HomepageState extends State<Homepage> {
                                                 tripID: tripDetail['id'],
                                               )),
                                     );
-                                  }else if(tripDetail['status'] == 'reached'){
-                                    print('end stop is:${tripDetail['ending_stop']}');
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => Scanpage(
-                                        tripID: tripDetail['id'],
-                                      endstop: tripDetail['ending_stop'],
-                                    ),));
                                   }
                                 },
                                 child: Padding(

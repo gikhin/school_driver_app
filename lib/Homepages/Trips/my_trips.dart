@@ -180,7 +180,7 @@ class _MyTripsState extends State<MyTrips> {
 
       // Make the POST request
       final response = await http.delete(
-        Uri.parse(AppUrl.deletingTrip),
+        Uri.parse(AppUrl.deleteTrip),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -246,8 +246,8 @@ class _MyTripsState extends State<MyTrips> {
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      print("weeeee${jsonDecode(response.body)}");
       final placeDetails = json.decode(response.body)['result'];
+      print("weeeee${jsonDecode(response.body)}");
 
       if (placeDetails != null) {
         // Extract latitude and longitude
@@ -466,6 +466,7 @@ class _MyTripsState extends State<MyTrips> {
                                     child: ElevatedButton(
                                       style: ElevatedButton.styleFrom(backgroundColor: pinkColor),
                                       onPressed: () {
+                                        print("Clickeeeeed");
                                         print('ddddddd:${drivertrips[index]['id']}');
                                         print('delete btn clicked');
                                         deletetrip(int.parse(drivertrips[index]['id'].toString()));

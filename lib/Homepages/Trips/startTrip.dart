@@ -149,7 +149,7 @@ class _SelectTripState extends State<SelectTrip> {
 
       // Make the POST request
       final response = await http.delete(
-        Uri.parse(AppUrl.deletingTrip),
+        Uri.parse(AppUrl.deleteTrip),
         headers: {
           'Content-Type': 'application/json',
         },
