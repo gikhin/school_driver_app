@@ -1,6 +1,8 @@
 
 import 'dart:convert';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:school_driver/Utils/Appurls/appurl.dart';
@@ -26,7 +28,7 @@ class _MyvehiclesState extends State<Myvehicles> {
   final driverName = TextEditingController();
   final vehicleNumber = TextEditingController();
   final capacity = TextEditingController();
-  final image = TextEditingController();
+
 
   bool isLoading = false;
 
@@ -34,6 +36,7 @@ class _MyvehiclesState extends State<Myvehicles> {
   final PageController _pageController = PageController();
 
   File? _image;
+  String? downURL;
 
   @override
   void dispose() {
@@ -62,11 +65,6 @@ class _MyvehiclesState extends State<Myvehicles> {
           vehiclesDetails.clear();
           vehiclesDetails = responseData['data'];
         });
-        print('helooooooooo');
-        // print(vehiclesDetails['name']);
-        print('4444444444444444');
-        // print('vehicle details list is : ${vehiclesDetailsmap['photo']}');
-        print('response data of vehicle history is :${responseData}');
       } else {
         // Error handling
         print('Error - Status Code: ${response.statusCode}');
@@ -85,48 +83,140 @@ class _MyvehiclesState extends State<Myvehicles> {
     vehicleHistory();
   }
 
-  Future<void> addVehicles() async {
-    final Map<String, dynamic> data = {
-      'driver_id': Utils.userLoggedId,
-      'seat_capacity': int.parse(capacity.text),
-      'vehicle_no': vehicleNumber.text,
-      'photo':
-      "https://imgd-ct.aeplcdn.com/370x208/n/cw/ec/130591/fronx-exterior-right-front-three-quarter-109.jpeg?isig=0&q=80",
-      'vehicle_name': vehicleName.text,
-    };
+  // Future<void> addVehicles(File? image) async {
+  //   print('hey prabu');
+  //   try {
+  //     if (image == null) {
+  //       print('No image selected');
+  //       // Handle the case where no image is selected
+  //       return;
+  //     }
+  //
+  //     final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+  //     final Reference reference =
+  //     FirebaseStorage.instance.ref().child('test/$fileName.jpg');
+  //
+  //     final UploadTask uploadTask = reference.putFile(image);
+  //     final TaskSnapshot uploadSnapshot = await uploadTask.whenComplete(() {});
+  //
+  //     if (uploadSnapshot.state == TaskState.success) {
+  //       final downloadUrl = await reference.getDownloadURL();
+  //
+  //       final Map<String, dynamic> data = {
+  //         'driver_id': Utils.userLoggedId,
+  //         'seat_capacity': int.parse(capacity.text),
+  //         'vehicle_no': vehicleNumber.text,
+  //         'photo': downloadUrl,
+  //         'vehicle_name': vehicleName.text,
+  //       };
+  //
+  //       final response = await http.post(
+  //         Uri.parse(AppUrl.addVehicles),
+  //         headers: <String, String>{
+  //           'Content-Type': 'application/json; charset=UTF-8',
+  //         },
+  //         body: jsonEncode(data),
+  //       ).timeout(Duration(seconds: 10));
+  //
+  //       if (response.statusCode == 200) {
+  //         Utils.flushBarErrorMessage(
+  //             'Vehicle added successfull !', context, Colors.green);
+  //         vehicleHistory();
+  //         print('Post request successful!');
+  //         print('Response: ${response.body}');
+  //         // You might want to return something here or notify the UI about success.
+  //       } else {
+  //         print('Failed to post data. Error code: ${response.statusCode}');
+  //         print('Error message: ${response.body}');
+  //         // You might want to throw an exception here or notify the UI about the failure.
+  //       }
+  //     } else {
+  //       print('Failed to upload image to Firebase Storage');
+  //       // You might want to throw an exception here or notify the UI about the failure.
+  //     }
+  //   } catch (error) {
+  //     print('Error during the HTTP request: $error');
+  //     // Handle specific exceptions or rethrow the error if needed.
+  //     // You might want to notify the UI about the error.
+  //   }
+  // }
 
+
+  Future<void> uploadImageToFirebase(File? image) async {
     try {
-      final response = await http
-          .post(
-        Uri.parse(AppUrl.addVehicles),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(data),
-      )
-          .timeout(Duration(seconds: 10)); // Add a timeout for the request.
+      if (image == null) {
+        Fluttertoast.showToast(msg: 'No image selected');
+        print('No image selected');
+        // Handle the case where no image is selected
+        return;
+      }
 
-      print('URL: ${AppUrl.addVehicles}');
-      print('Request Data: ${jsonEncode(data)}');
+      final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      final Reference reference =
+      FirebaseStorage.instance.ref().child('test/$fileName.jpg');
 
-      if (response.statusCode == 200) {
-        Utils.flushBarErrorMessage(
-            'Vehicle added successfull !', context, Colors.green);
-        vehicleHistory();
-        print('Post request successful!');
-        print('Response: ${response.body}');
-        // You might want to return something here or notify the UI about success.
+      final UploadTask uploadTask = reference.putFile(image);
+      final TaskSnapshot uploadSnapshot = await uploadTask.whenComplete(() {});
+
+      if (uploadSnapshot.state == TaskState.success) {
+        final downloadUrl = await reference.getDownloadURL();
+        print('downloadUrl is :${downloadUrl}');
+        // onSuccess(downloadUrl); // Invoke the callback with the download URL
+        downURL = downloadUrl;
+        print('ssss${downURL}');
       } else {
-        print('Failed to post data. Error code: ${response.statusCode}');
-        print('Error message: ${response.body}');
+        downURL = '';
+        print('Failed to upload image to Firebase Storage');
         // You might want to throw an exception here or notify the UI about the failure.
       }
+    } catch (error) {
+      print('Error during image upload to Firebase Storage: $error');
+      // Handle specific exceptions or rethrow the error if needed.
+      // You might want to notify the UI about the error.
+    }
+  }
+
+  Future<void> addVehicles(String url) async {
+    print('hey prabu');
+    try {
+        final Map<String, dynamic> data = {
+          'driver_id': Utils.userLoggedId,
+          'seat_capacity': int.parse(capacity.text),
+          'vehicle_no': vehicleNumber.text,
+          'photo': url,
+          'vehicle_name': vehicleName.text,
+        };
+
+        final response = await http.post(
+          Uri.parse(AppUrl.addVehicles),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(data),
+        ).timeout(Duration(seconds: 10));
+
+        if (response.statusCode == 200) {
+          Utils.flushBarErrorMessage(
+              'Vehicle added successfully!', context, Colors.green);
+          vehicleHistory();
+          print('Post request successful!');
+          print('Response: ${response.body}');
+          // You might want to return something here or notify the UI about success.
+        } else {
+          print('Failed to post data. Error code: ${response.statusCode}');
+          print('Error message: ${response.body}');
+          // You might want to throw an exception here or notify the UI about the failure.
+        }
     } catch (error) {
       print('Error during the HTTP request: $error');
       // Handle specific exceptions or rethrow the error if needed.
       // You might want to notify the UI about the error.
     }
   }
+
+
+
+
 
 
   @override
@@ -441,57 +531,66 @@ class _MyvehiclesState extends State<Myvehicles> {
             else
               Text('No image selected', style: TextStyle(color: Colors.black)),
             SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0,right: 8.0),
-              child: SizedBox(
-                width: 323.0,
-                height: 40.0,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final imageSource = await showDialog<ImageSource>(
-                      context: context,
-                      builder: (BuildContext context) => AlertDialog(
-                        title: Text("Select the image source"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, ImageSource.camera),
-                            child: Text("Camera"),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, ImageSource.gallery),
-                            child: Text("Gallery"),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (imageSource != null) {
-                      final pickedFile =
-                      await ImagePicker().getImage(source: imageSource);
-                      if (pickedFile != null) {
-                        setState(() {
-                          _image = File(pickedFile.path);
-                        });
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: checkIncolor,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.camera_alt, color: Colors.white), // Camera icon
-                      SizedBox(width: 8), // Space between icon and text
-                      Text(
-                        "Vehicle",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+                child: SizedBox(
+                  width: 323.0,
+                  height: 40.0,
+                  child:ElevatedButton(
+                    onPressed: () async {
+                      final imageSource = await showDialog<ImageSource>(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: Text("Select the image source"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, ImageSource.camera),
+                              child: Text("Camera"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, ImageSource.gallery),
+                              child: Text("Gallery"),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                      );
+
+                      if (imageSource != null) {
+                        final pickedFile = await ImagePicker().getImage(source: imageSource);
+
+                        if (pickedFile != null) {
+                          setState(() {
+                            _image = File(pickedFile.path);
+                            uploadImageToFirebase(File(pickedFile.path));
+                          });
+
+                        } else {
+                          // Handle the case where the user canceled image selection
+                          print("User canceled image selection");
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: checkIncolor,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.camera_alt, color: Colors.white), // Camera icon
+                        SizedBox(width: 8), // Space between icon and text
+                        Text(
+                          "Vehicle",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+
+
                 ),
               ),
             ),
@@ -505,7 +604,8 @@ class _MyvehiclesState extends State<Myvehicles> {
               bgColor: startTripColor,
               onPressed: () {
                 print('lllll');
-                addVehicles();
+                addVehicles(downURL.toString());
+
                 vehicleName.clear();
                 vehicleNumber.clear();
                 capacity.clear();
