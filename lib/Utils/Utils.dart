@@ -18,6 +18,7 @@ class Utils{
   static String? userLoggedEmail;
   static String? googleID;
   static String? photURL;
+  static int? masterTripid;
 
   static flushBarErrorMessage(String message , BuildContext context,Color color){
     showFlushbar(context: context,

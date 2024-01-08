@@ -31,6 +31,8 @@ class _HomepageState extends State<Homepage> {
   List<dynamic> tripslist = [];
   List<dynamic> vehicleslist = [];
 
+
+  List<dynamic> drivertrips = [];
   bool isVehicle = true;
   bool isTrip = true;
 
@@ -209,6 +211,60 @@ class _HomepageState extends State<Homepage> {
       _startLocationUpdates();
     }
   }
+
+  ///StartTrip
+  Future<void> startTRIP(String stopName,int tripID,String endstop,BuildContext context) async {
+    // Your request payload
+    Map<String, dynamic> requestBody = {
+      "starting_stop": stopName,
+      "status": "started",
+      "driver_id": Utils.userLoggedId,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(AppUrl.master_Trip),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        Utils.masterTripid = int.parse( jsonResponse['data']['id'].toString());
+        print('Trip is issss${Utils.masterTripid}');
+
+        Fluttertoast.showToast(msg: 'Your Trip Started!');
+        Utils.flushBarErrorMessage(jsonResponse['message'], context, Colors.green);
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Scanpage(tripID: tripID,endstop:stopName ,enddstop: endstop,)),
+        );
+
+        print('API call success: ${response.body}');
+      } else {
+        // Handle error response
+        print('API call failed with status ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        // Optionally, handle different error scenarios based on status codes
+        if (response.statusCode == 404) {
+          // Handle 404 Not Found
+        } else {
+          // Handle other error scenarios
+        }
+      }
+    } catch (error) {
+      // Handle exceptions
+      print('Error during API call: $error');
+
+      // Optionally, show an error message to the user
+      Utils.flushBarErrorMessage('An error occurred', context, Colors.red);
+    }
+  }
+
 
   @override
   void initState() {
@@ -537,114 +593,104 @@ class _HomepageState extends State<Homepage> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                      itemCount: tripDetails.length,
-                      itemBuilder: (context, index) {
-                        print(tripDetails.length);
-                        print(tripDetails);
-                        final tripDetail = tripDetails[index];
-                        return Column(
-                          children: [
-                            Container(
-                              decoration:BoxDecoration(
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black,
-                                      blurRadius: 10.0,
-                                      spreadRadius: -15,
-                                      offset: Offset(
-                                        -2,
-                                        -2,
-                                      ),
-                                    )
-                                  ]
-                              ),
-                              child: Card(
-                                child: SizedBox(
-                                  height: 112.5,
-                                  width: 324.875,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      children: [
-                                        ListTile(
-                                          title: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.school_outlined,
-                                                color: Colors.blue,
-                                              ),
-                                              Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                      tripDetail['starting_stop'] == null? 'Starting stop' : '${tripDetail['starting_stop'].toString().toUpperCase().split(',')[0]}')),
-                                            ],
-                                          ),
-                                          subtitle: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.location_on,
-                                                color: Colors.pink,
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Text(
-                                                  tripDetail['ending_stop'] == null? 'Ending stop' :  '${tripDetail['ending_stop'].toString().toUpperCase()}',
-                                                  style: TextStyle(
-                                                      color: Colors.black),
-                                                ),
-                                              )
-                                            ],
-                                          ),
+                    itemCount: tripDetails.length,
+                    itemBuilder: (context, index) {
+                      final tripDetail = tripDetails[index];
+
+                      return Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  blurRadius: 10.0,
+                                  spreadRadius: -15,
+                                  offset: Offset(-2, -2),
+                                ),
+                              ],
+                            ),
+                            child: Card(
+                              child: SizedBox(
+                                height: 112.5,
+                                width: 324.875,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: [
+                                      ListTile(
+                                        title: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.school_outlined,
+                                              color: Colors.blue,
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child:     Text(
+                                            tripDetail['starting_stop'] == null? 'Starting stop' : '${tripDetail['starting_stop'].toString().toUpperCase().split(',')[0]}')),],),
+
+
+                                        subtitle: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.location_on,
+                                              color: Colors.pink,
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                  tripDetail['ending_stop'] == null? 'Ending stop' :
+                                                  '${tripDetail['ending_stop'].toString().toUpperCase().split(',')[0]}',
+                                                style: TextStyle(color: Colors.black),)
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
                             ),
-                            Padding(
+                          ),
+
+                          Visibility(
+                            visible: tripDetail['status'] == 'reached',
+                            child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: SizedBox(
                                 height: 55,
                                 width: 330,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        tripDetail['status'] == 'reached'
-                                            ? startTripColor
-                                            : openScanner,
+                                    backgroundColor: startTripColor,
                                   ),
                                   onPressed: () {
-                                    if (tripDetail['status'] != 'reached') {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Scanpage(
-                                                  tripID: tripDetail['id'],
-                                                )),
-                                      );
-                                    }
+                                    startTRIP(
+                                      tripDetail['starting_stop'], // Assuming this is the starting stop
+                                      tripDetail['id'],
+                                      tripDetail['ending_stop'], // Assuming this is the ending stop
+                                      context,
+                                    );
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      tripDetail['status'] == 'reached'
-                                          ? 'Start Again'
-                                          : 'Open Scanner',
-                                      style:
-                                          TextStyle(fontWeight: FontWeight.bold),
+                                      'Start Again',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ],
-                        );
-                      }),
+                          ),
+                        ],
+                      );
+                    },
+
+
                 )
-              ],
+                ) ],
             ),
           ),
         ));

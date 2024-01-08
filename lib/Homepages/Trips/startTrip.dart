@@ -61,7 +61,7 @@ class _SelectTripState extends State<SelectTrip> {
       print('Error during POST request: $error');
     }
   }
-  Future<void> startTrip(String stopName,int tripID, BuildContext context) async {
+  Future<void> startTrip(String stopName,int tripID,String endstop,BuildContext context) async {
     // Your request payload
     Map<String, dynamic> requestBody = {
       "starting_stop": stopName,
@@ -80,12 +80,15 @@ class _SelectTripState extends State<SelectTrip> {
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
+        Utils.masterTripid = int.parse( jsonResponse['data']['id'].toString());
+        print('Trip is issss${Utils.masterTripid}');
+
         Fluttertoast.showToast(msg: 'Your Trip Started!');
         Utils.flushBarErrorMessage(jsonResponse['message'], context, Colors.green);
 
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Scanpage(tripID: tripID)),
+          MaterialPageRoute(builder: (context) => Scanpage(tripID: tripID,endstop:stopName ,enddstop: endstop,)),
         );
 
         print('API call success: ${response.body}');
@@ -311,7 +314,10 @@ class _SelectTripState extends State<SelectTrip> {
                                           style: ElevatedButton.styleFrom(backgroundColor: scanColor),
                                           onPressed: () {
                                             print('for trip id is:${drivertrips[index]['id']}');
-                                            startTrip(drivertrips[index]['stop'][0],drivertrips[index]['id'], context);
+                                            print('stop name  is: ${drivertrips[index]['stop'][0]}');
+                                            print('stop end_stopname is: ${drivertrips[index]['stop'].last}');
+
+                                            startTrip(drivertrips[index]['stop'][0],drivertrips[index]['id'],drivertrips[index]['stop'].last, context);
                                           },
                                           child: Text('Start'),
                                         ),

@@ -141,12 +141,15 @@ class _MyTripsState extends State<MyTrips> {
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
+        Utils.masterTripid = int.parse( jsonResponse['data']['id'].toString());
+        print('Trip is issss${Utils.masterTripid}');
+
         Fluttertoast.showToast(msg: 'Your Trip Started!');
         Utils.flushBarErrorMessage(jsonResponse['message'], context, Colors.green);
 
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Scanpage(tripID: tripID,endstop:endstop ,)),
+          MaterialPageRoute(builder: (context) => Scanpage(tripID: tripID,endstop:stopName ,enddstop: endstop,)),
         );
 
         print('API call success: ${response.body}');
@@ -192,7 +195,7 @@ class _MyTripsState extends State<MyTrips> {
       // Check if the request was successful (status code 200)
       if (response.statusCode == 200) {
         Fluttertoast.showToast(msg: 'Trip Successfully Deleted !');
-        
+
         // Parse the response JSON
         Map<String, dynamic> responseBody = json.decode(response.body);
         return responseBody;
@@ -485,7 +488,9 @@ class _MyTripsState extends State<MyTrips> {
                                       onPressed: () {
                                         print('for trip id is:${drivertrips[index]['id']}');
                                         print('stop name  is: ${drivertrips[index]['stop'][0]}');
-                                        startTrip(drivertrips[index]['stop'][0],drivertrips[index]['id'],drivertrips[index]['stop'][0], context);
+                                        print('stop end_stopname is: ${drivertrips[index]['stop'].last}');
+
+                                        startTrip(drivertrips[index]['stop'][0],drivertrips[index]['id'],drivertrips[index]['stop'].last, context);
 
                                       },
                                       child: Text('Start'),

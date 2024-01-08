@@ -1,6 +1,8 @@
 
 import 'dart:convert';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:school_driver/Utils/Appurls/appurl.dart';
@@ -30,6 +32,8 @@ class _EditVehicleState extends State<EditVehicle> {
   final image = TextEditingController();
   String? photoUrl;
   File? _image;
+  String? downURL;
+
 
   Future<void> vehicleHistory() async {
     try {
@@ -65,13 +69,12 @@ class _EditVehicleState extends State<EditVehicle> {
     }
   }
 
-  Future<void> editVehicle() async {
+  Future<void> editVehicle(String url) async {
     final Map<String, dynamic> data = {
       'vehicle_id': widget.vehicle_id,
       'seat_capacity': int.parse(capacity.text),
       'vehicle_no': vehicleNumber.text,
-      // 'photo':
-      // "https://imgd-ct.aeplcdn.com/370x208/n/cw/ec/130591/fronx-exterior-right-front-three-quarter-109.jpeg?isig=0&q=80",
+      'photo': url,
       'vehicle_name': vehicleName.text,
     };
 
@@ -111,7 +114,42 @@ class _EditVehicleState extends State<EditVehicle> {
     }
   }
 
-  //geting single vehicle details
+  Future<void> uploadImageToFirebase(File? image) async {
+    try {
+      if (image == null) {
+        Fluttertoast.showToast(msg: 'No image selected');
+        print('No image selected');
+        // Handle the case where no image is selected
+        return;
+      }
+
+      final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      final Reference reference =
+      FirebaseStorage.instance.ref().child('test/$fileName.jpg');
+
+      final UploadTask uploadTask = reference.putFile(image);
+      final TaskSnapshot uploadSnapshot = await uploadTask.whenComplete(() {});
+
+      if (uploadSnapshot.state == TaskState.success) {
+        final downloadUrl = await reference.getDownloadURL();
+        print('downloadUrl is :${downloadUrl}');
+        // onSuccess(downloadUrl); // Invoke the callback with the download URL
+        setState(() {
+          downURL = downloadUrl;
+        });
+        print('ssss${downURL}');
+      } else {
+        downURL = '';
+        print('Failed to upload image to Firebase Storage');
+        // You might want to throw an exception here or notify the UI about the failure.
+      }
+    } catch (error) {
+      print('Error during image upload to Firebase Storage: $error');
+
+    }
+  }
+
+  ///geting single vehicle details
   Future<void> getvehicledata() async {
     print('This Function called');
 
@@ -148,23 +186,18 @@ class _EditVehicleState extends State<EditVehicle> {
       print("POST request failed with status: ${response.statusCode}");
     }
   }
-
-
-
   @override
   void initState() {
     // TODO: implement initState
     print('passed id is:${widget.vehicle_id}');
     super.initState();
   }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading: Icon(Icons.menu, color: textColor1),
+
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -278,7 +311,7 @@ class _EditVehicleState extends State<EditVehicle> {
                               child: SizedBox(
                                 width: 323.0,
                                 height: 40.0,
-                                child: ElevatedButton(
+                                child:ElevatedButton(
                                   onPressed: () async {
                                     final imageSource = await showDialog<ImageSource>(
                                       context: context,
@@ -298,12 +331,17 @@ class _EditVehicleState extends State<EditVehicle> {
                                     );
 
                                     if (imageSource != null) {
-                                      final pickedFile =
-                                      await ImagePicker().getImage(source: imageSource);
+                                      final pickedFile = await ImagePicker().getImage(source: imageSource);
+
                                       if (pickedFile != null) {
                                         setState(() {
                                           _image = File(pickedFile.path);
+                                          uploadImageToFirebase(File(pickedFile.path));
                                         });
+
+                                      } else {
+
+                                        print("User canceled image selection");
                                       }
                                     }
                                   },
@@ -325,15 +363,26 @@ class _EditVehicleState extends State<EditVehicle> {
                                     ],
                                   ),
                                 ),
+
+
                               ),
                             ),
                             SizedBox(height: 20),
-                            MyButtonWidget(
-                              buttonName: 'Save',
-                              bgColor: startTripColor,
-                              onPressed: () {
-                                editVehicle();
-                              },
+                            Visibility(
+                              visible: downURL != null && downURL!.isNotEmpty,
+                              child: MyButtonWidget(
+                                buttonName: 'Save',
+                                bgColor: startTripColor,
+                                onPressed: () {
+                                  print('lllll');
+                                  editVehicle(downURL.toString());
+                                  vehicleName.clear();
+                                  vehicleNumber.clear();
+                                  capacity.clear();
+                                  downURL=null;
+
+                                },
+                              ),
                             )
                           ],
                         ),
