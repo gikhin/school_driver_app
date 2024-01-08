@@ -162,7 +162,9 @@ class _MyvehiclesState extends State<Myvehicles> {
         final downloadUrl = await reference.getDownloadURL();
         print('downloadUrl is :${downloadUrl}');
         // onSuccess(downloadUrl); // Invoke the callback with the download URL
-        downURL = downloadUrl;
+        setState(() {
+          downURL = downloadUrl;
+        });
         print('ssss${downURL}');
       } else {
         downURL = '';
@@ -171,8 +173,7 @@ class _MyvehiclesState extends State<Myvehicles> {
       }
     } catch (error) {
       print('Error during image upload to Firebase Storage: $error');
-      // Handle specific exceptions or rethrow the error if needed.
-      // You might want to notify the UI about the error.
+
     }
   }
 
@@ -194,6 +195,7 @@ class _MyvehiclesState extends State<Myvehicles> {
           },
           body: jsonEncode(data),
         ).timeout(Duration(seconds: 10));
+        print('$data');
 
         if (response.statusCode == 200) {
           Utils.flushBarErrorMessage(
@@ -209,8 +211,7 @@ class _MyvehiclesState extends State<Myvehicles> {
         }
     } catch (error) {
       print('Error during the HTTP request: $error');
-      // Handle specific exceptions or rethrow the error if needed.
-      // You might want to notify the UI about the error.
+
     }
   }
 
@@ -486,9 +487,6 @@ class _MyvehiclesState extends State<Myvehicles> {
       SizedBox(height: 22),
       Container(
         width: 324,
-        height: 416,
-
-
         decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(6),
@@ -531,67 +529,65 @@ class _MyvehiclesState extends State<Myvehicles> {
             else
               Text('No image selected', style: TextStyle(color: Colors.black)),
             SizedBox(height: 20),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0,right: 8.0),
-                child: SizedBox(
-                  width: 323.0,
-                  height: 40.0,
-                  child:ElevatedButton(
-                    onPressed: () async {
-                      final imageSource = await showDialog<ImageSource>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                          title: Text("Select the image source"),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, ImageSource.camera),
-                              child: Text("Camera"),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, ImageSource.gallery),
-                              child: Text("Gallery"),
-                            ),
-                          ],
-                        ),
-                      );
-
-                      if (imageSource != null) {
-                        final pickedFile = await ImagePicker().getImage(source: imageSource);
-
-                        if (pickedFile != null) {
-                          setState(() {
-                            _image = File(pickedFile.path);
-                            uploadImageToFirebase(File(pickedFile.path));
-                          });
-
-                        } else {
-                          // Handle the case where the user canceled image selection
-                          print("User canceled image selection");
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: checkIncolor,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.camera_alt, color: Colors.white), // Camera icon
-                        SizedBox(width: 8), // Space between icon and text
-                        Text(
-                          "Vehicle",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+              child: SizedBox(
+                width: 323.0,
+                height: 40.0,
+                child:ElevatedButton(
+                  onPressed: () async {
+                    final imageSource = await showDialog<ImageSource>(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        title: Text("Select the image source"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, ImageSource.camera),
+                            child: Text("Camera"),
                           ),
-                        ),
-                      ],
-                    ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, ImageSource.gallery),
+                            child: Text("Gallery"),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (imageSource != null) {
+                      final pickedFile = await ImagePicker().getImage(source: imageSource);
+
+                      if (pickedFile != null) {
+                        setState(() {
+                          _image = File(pickedFile.path);
+                          uploadImageToFirebase(File(pickedFile.path));
+                        });
+
+                      } else {
+                        // Handle the case where the user canceled image selection
+                        print("User canceled image selection");
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: checkIncolor,
                   ),
-
-
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.camera_alt, color: Colors.white), // Camera icon
+                      SizedBox(width: 8), // Space between icon and text
+                      Text(
+                        "Vehicle",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+
+
               ),
             ),
             // MyTextFieldWidget(
@@ -599,17 +595,21 @@ class _MyvehiclesState extends State<Myvehicles> {
             //     labelName: 'Image',
             //     validator: () {}),
             SizedBox(height: 20),
-            MyButtonWidget(
-              buttonName: 'Add Now',
-              bgColor: startTripColor,
-              onPressed: () {
-                print('lllll');
-                addVehicles(downURL.toString());
+            Visibility(
+              visible: downURL != null && downURL!.isNotEmpty,
+              child: MyButtonWidget(
+                buttonName: 'Add Now',
+                bgColor: startTripColor,
+                onPressed: () {
+                  print('lllll');
+                  addVehicles(downURL.toString());
 
-                vehicleName.clear();
-                vehicleNumber.clear();
-                capacity.clear();
-              },
+                  vehicleName.clear();
+                  vehicleNumber.clear();
+                  capacity.clear();
+                  downURL=null;
+                },
+              ),
             )
           ],
         ),

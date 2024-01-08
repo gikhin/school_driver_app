@@ -25,6 +25,7 @@ class _SignupPageState extends State<SignupPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final mobileController = TextEditingController();
+  bool _isPasswordVisible = false;
 
 
   Future<void> _registerUser() async {
@@ -62,7 +63,9 @@ class _SignupPageState extends State<SignupPage> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Colors.white,
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: Colors.white,
       body:       Center(
         child: SingleChildScrollView(
           child: Column(
@@ -71,8 +74,44 @@ class _SignupPageState extends State<SignupPage> {
               Text('Sign Up',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
               MyTextFieldWidget(labelName: 'Name', controller: nameController, validator: (){},),
               MyTextFieldWidget(labelName: 'Email', controller: emailController, validator: (){},),
-              MyTextFieldWidget(labelName: 'Password', controller: passwordController, validator: (){},),
               MyTextFieldWidget(labelName: 'Phone Number', controller: mobileController, validator: (){},),
+
+              Column(crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Password'),
+                  SizedBox(height: 10,),
+                  Container(
+                    width: 323.0,
+                    height: 40.0,
+                    child: TextFormField(
+                      controller: passwordController,
+                      obscureText: !_isPasswordVisible,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: fillColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6.0),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                        suffixIcon: IconButton(
+                          icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off,color:Colors.black,),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+
+
+                ],
+              ),
+              SizedBox(height: 20,),
+
+
               MyButtonWidget(buttonName: 'Sign Up', bgColor: Colors.purple.shade400, onPressed: (){
                _registerUser();
               }),

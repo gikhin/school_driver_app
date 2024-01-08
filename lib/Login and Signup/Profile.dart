@@ -143,10 +143,11 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading: Icon(Icons.menu, color: textColor1),
+
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),

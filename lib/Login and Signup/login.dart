@@ -24,6 +24,8 @@ class Loginpage extends StatefulWidget {
 class _LoginpageState extends State<Loginpage> {
   final userName = TextEditingController();
   final password = TextEditingController();
+  bool _isPasswordVisible = false;
+
 
   Future<void> loginUser() async {
     final Map<String, String> data = {
@@ -65,7 +67,9 @@ class _LoginpageState extends State<Loginpage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Colors.white,
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -74,17 +78,78 @@ class _LoginpageState extends State<Loginpage> {
               SizedBox(height: 30.0,),
               Center(child: Image.asset('assets/login.jpg')),
               SizedBox(height: 10.0,),
-             MyTextFieldWidget(labelName: 'Email or username', controller: userName, validator: (){},),
-             MyTextFieldWidget(labelName: 'Password', controller: password, validator: (){},),
+
+              Column(crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Email or username'),
+                  SizedBox(height: 10,),
+                  Container(
+                    width: 323.0,
+                    height: 40.0,
+                    child: TextFormField(
+                      controller: userName,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: fillColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6.0),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+
+                      ),
+                    ),
+                  ),
+
+
+                ],
+              ),
+
+             Column(crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text('Password'),
+                 SizedBox(height: 10,),
+                 Container(
+                   width: 323.0,
+                   height: 40.0,
+                   child: TextFormField(
+                     controller: password,
+                     obscureText: !_isPasswordVisible,
+                     decoration: InputDecoration(
+                       filled: true,
+                       fillColor: fillColor,
+                       border: OutlineInputBorder(
+                         borderRadius: BorderRadius.circular(6.0),
+                         borderSide: BorderSide.none,
+                       ),
+                       contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                       suffixIcon: IconButton(
+                         icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off,color:Colors.black,),
+                         onPressed: () {
+                           setState(() {
+                             _isPasswordVisible = !_isPasswordVisible;
+                           });
+                         },
+                       ),
+                     ),
+                   ),
+                 ),
+
+
+               ],
+             ),
+              SizedBox(height: 20,),
+
+
               MyButtonWidget(buttonName: 'Login', bgColor: Colors.purple.shade400, onPressed: (){
                 loginUser();
               }),
-          
+
               TextButton(onPressed: () {
-          
+
               }, child: TextButton(onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SignupPage(),));
-          
+
               }, child: Text('Dont have an account?'))),
               Column(
                 children: [
@@ -95,7 +160,7 @@ class _LoginpageState extends State<Loginpage> {
                 ],
               )
             ],
-          
+
           ),
         ),
       ),

@@ -28,6 +28,7 @@ class _EditVehicleState extends State<EditVehicle> {
   final vehicleNumber = TextEditingController();
   final capacity = TextEditingController();
   final image = TextEditingController();
+  String? photoUrl;
   File? _image;
 
   Future<void> vehicleHistory() async {
@@ -69,8 +70,8 @@ class _EditVehicleState extends State<EditVehicle> {
       'vehicle_id': widget.vehicle_id,
       'seat_capacity': int.parse(capacity.text),
       'vehicle_no': vehicleNumber.text,
-      'photo':
-      "https://imgd-ct.aeplcdn.com/370x208/n/cw/ec/130591/fronx-exterior-right-front-three-quarter-109.jpeg?isig=0&q=80",
+      // 'photo':
+      // "https://imgd-ct.aeplcdn.com/370x208/n/cw/ec/130591/fronx-exterior-right-front-three-quarter-109.jpeg?isig=0&q=80",
       'vehicle_name': vehicleName.text,
     };
 
@@ -138,6 +139,7 @@ class _EditVehicleState extends State<EditVehicle> {
           vehicleName.text = responseData['data'][0]['vehicle_name'];
           vehicleNumber.text = responseData['data'][0]['vehicle_no'];
           capacity.text = responseData['data'][0]['seat_capacity'].toString();
+        photoUrl = responseData['data'][0]['photo'];
         // });
       } catch (e) {
         print("Error decoding JSON: $e");
@@ -222,7 +224,7 @@ class _EditVehicleState extends State<EditVehicle> {
                     SizedBox(height: 22),
                     Container(
                       width: 324,
-                      height: 416,
+
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(6),
@@ -239,6 +241,12 @@ class _EditVehicleState extends State<EditVehicle> {
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           children: [
+                            if (photoUrl != null) // Display the photo if available
+                              Image.network(
+                                photoUrl!,
+                                width: 100, // Set the width as needed
+                                height: 100, // Set the height as needed
+                              ),
                             MyTextFieldWidget(
                               controller: vehicleName,
                               labelName: 'Vehicle Name',

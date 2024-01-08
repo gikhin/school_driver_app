@@ -336,6 +336,7 @@ class _SelectTripState extends State<SelectTrip> {
                     bgColor: checkOutcolor,
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => MyTrips(),));
+
                     },
                   ),
                 ),

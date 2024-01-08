@@ -117,7 +117,7 @@ class _ScanpageState extends State<Scanpage> {
         backgroundColor: Colors.white,
         appBar: AppBar(title: Text('Your trip started'),
           backgroundColor: Colors.white,
-          leading: Icon(Icons.menu, color: textColor1),
+
           actions: [
             Padding(
               padding: const EdgeInsets.all(8.0),

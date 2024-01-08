@@ -10,7 +10,8 @@ class MyTextFieldWidget extends StatelessWidget{
   TextEditingController controller;
   Function? validator;
   bool? enabled;
-  MyTextFieldWidget({required this.labelName,required this.controller,required this.validator,this.enabled,Key? key}) : super(key: key);
+  bool isObsecure;
+  MyTextFieldWidget({required this.labelName,required this.controller,required this.validator,this.enabled,this.isObsecure = false,Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +31,7 @@ class MyTextFieldWidget extends StatelessWidget{
                 child: TextFormField(
                   controller: controller,
                   enabled: enabled,
+                  obscureText: isObsecure,
                   validator:  (value) {
 
                   },

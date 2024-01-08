@@ -12,6 +12,7 @@ import '../../Login and Signup/Profile.dart';
 import '../../Widgets/buttons.dart';
 import '../../Widgets/text_field.dart';
 import '../../constents.dart';
+import 'package:geocoding/geocoding.dart';
 
 class MyTrips extends StatefulWidget {
   const MyTrips({Key? key}) : super(key: key);
@@ -36,6 +37,7 @@ class _MyTripsState extends State<MyTrips> {
   Future<void> addstop(List<dynamic> trips) async {
     print('add stop function called.....');
     print(trips);
+
 
     // Assuming the first stop is in the list of stops
     // Map<String, dynamic> firstStop = {
@@ -247,15 +249,15 @@ class _MyTripsState extends State<MyTrips> {
 
     if (response.statusCode == 200) {
       final placeDetails = json.decode(response.body)['result'];
-      print("weeeee${jsonDecode(response.body)}");
 
       if (placeDetails != null) {
-        // Extract latitude and longitude
-        double latitude = placeDetails['geometry']['location']['lat'];
-        double longitude = placeDetails['geometry']['location']['lng'];
+        String address = placeDetails['formatted_address'];
+        List<Location> locations = await locationFromAddress(address);
 
-        print('Place ID: $placeId, Latitude: $latitude, Longitude: $longitude');
+        double latitude = locations.first.latitude;
+        double longitude = locations.first.longitude;
 
+        print('School Name - Place ID: $placeId, Latitude: $latitude, Longitude: $longitude');
       }
     } else {
       throw Exception('Failed to load place details');
@@ -312,15 +314,16 @@ class _MyTripsState extends State<MyTrips> {
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      print("Aaaaaaaaa${jsonDecode(response.body)}");
       final placeDetails = json.decode(response.body)['result'];
 
       if (placeDetails != null) {
-        // Extract latitude and longitude
-        double latitude = placeDetails['geometry']['location']['lat'];
-        double longitude = placeDetails['geometry']['location']['lng'];
+        String address = placeDetails['formatted_address'];
+        List<Location> locations = await locationFromAddress(address);
 
-        print('Place ID: $placeId, Latitude: $latitude, Longitude: $longitude');
+        double latitude = locations.first.latitude;
+        double longitude = locations.first.longitude;
+
+        print('Stop - Place ID: $placeId, Latitude: $latitude, Longitude: $longitude');
       }
     } else {
       throw Exception('Failed to load stop details');
@@ -653,6 +656,7 @@ class _MyTripsState extends State<MyTrips> {
                           ),
                         ),
                         SizedBox(height: 15),
+
                       ],
                     ),
                   ),
@@ -704,112 +708,4 @@ class _MyTripsState extends State<MyTrips> {
     );
   }
 
-
-  // google places text field
-  Widget GooglePlaceField(TextEditingController controller){
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.blue.shade100,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: TextFormField(
-        style: TextStyle(
-          color: Colors.grey.shade200,
-        ),
-        controller: controller,
-        onTap:() async {
-          // var place = await PlacesAutocomplete.show(
-          //     logo: Text(''),
-          //     context: context,
-          //     apiKey: AppUrl.gKey,
-          //     mode: Mode.overlay,
-          //     types: [],
-          //     strictbounds: false,
-          //     components: [
-          //       // Component(Component.country, 'ind'),
-          //     ],
-          //
-          //     //google_map_webservice package
-          //     onError: (err){
-          //       print('error');
-          //     }
-          // );
-
-          // if(place != null){
-          //   setState(() {
-          //     controller.text = place.description.toString();
-          //   });
-          //
-          //   //form google_maps_webservice package
-          //   // final plist = GoogleMapsPlaces(apiKey:AppUrl.gKey,
-          //   //   apiHeaders: await GoogleApiHeaders().getHeaders(),
-          //   //   //from google_api_headers package
-          //   // );
-          //   String placeid = place.placeId ?? "0";
-          //   // final detail = await plist.getDetailsByPlaceId(placeid);
-          //   // final geometry = detail.result.geometry!;
-          //   // pickupLatitude = geometry.location.lat;
-          //   // pickupLongitude = geometry.location.lng;
-          // }
-        },
-        decoration:InputDecoration(
-          isDense: true,
-          contentPadding: EdgeInsets.only(left: 10,top: 15),
-          suffixIcon: Icon(Icons.location_on_outlined,color: Colors.green,),
-          border: InputBorder.none,
-          // focusedErrorBorder: OutlineInputBorder(
-          //     borderSide:
-          //     BorderSide(color: Colors.blue),
-          //     borderRadius: BorderRadius.circular(20)),
-          // errorBorder:OutlineInputBorder(
-          //     borderSide:
-          //     BorderSide(color: Colors.blue),
-          //     borderRadius: BorderRadius.circular(20)) ,
-          // enabledBorder: OutlineInputBorder(
-          //     borderRadius: BorderRadius.circular(20.0),
-          //     borderSide: BorderSide(color: Color(0xfff05acff),width: 1)
-          // ),
-
-          // focusedBorder: OutlineInputBorder(
-          //     borderSide:
-          //     BorderSide(color: Colors.blue),
-          //     borderRadius: BorderRadius.circular(20)),
-        ),
-        validator: (value) =>
-        value!.isEmpty ? 'invalid data' : null,
-      ),
-    );
-  }
-
-}
-
-class TripEntry {
-  String schoolName;
-  List<String> stopNames;
-
-  TripEntry({required this.schoolName, required this.stopNames});
-
-  Map<String,dynamic> toJson(){
-    return{
-      'schoolName':schoolName,
-      'stopName':stopNames
-    };
-  }
-}
-
-class Stop{
-  String name;
-  String latitude;
-  String longitude;
-
-
-  Stop({required this.name,required this.latitude, required this.longitude});
-
-  Map<String,dynamic> toJson(){
-    return{
-      'name':name,
-      'latitude':latitude,
-      'longitude':longitude
-    };
-  }
 }
