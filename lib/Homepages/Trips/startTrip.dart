@@ -277,14 +277,16 @@ class _SelectTripState extends State<SelectTrip> {
                                     children: [
                                       ListView.builder(
                                         shrinkWrap: true,
-                                        itemCount: drivertrips[index]['stop'].length,
+                                        itemCount: drivertrips[index]['stop'][0]['stops'].length,
                                         itemBuilder: (context, subIndex) {
-                                          if (subIndex < drivertrips[index]['stop'].length) {
+                                          if (subIndex < drivertrips[index]['stop'][0]['stops'].length) {
                                             return ListTile(
-                                              title: Text('${drivertrips[index]['stop'][subIndex]}' ?? ''),
+                                              title: Text(
+                                                '${drivertrips[index]['stop'][0]['stops'][subIndex]['name']}' ?? '',
+                                              ),
                                             );
                                           } else {
-                                            return SizedBox.shrink(); // or any other placeholder widget
+                                            return SizedBox.shrink();
                                           }
                                         },
                                       )
@@ -313,11 +315,13 @@ class _SelectTripState extends State<SelectTrip> {
                                         child: ElevatedButton(
                                           style: ElevatedButton.styleFrom(backgroundColor: scanColor),
                                           onPressed: () {
+                                            print('BBBBB');
                                             print('for trip id is:${drivertrips[index]['id']}');
-                                            print('stop name  is: ${drivertrips[index]['stop'][0]}');
-                                            print('stop end_stopname is: ${drivertrips[index]['stop'].last}');
+                                            print('stop name  is: ${drivertrips[index]['stop'][0]['stops'][0]['name']}');
+                                            print('stop end_stopname is: ${drivertrips[index]['stop'][0]['stops'].last['name']}');
 
-                                            startTrip(drivertrips[index]['stop'][0],drivertrips[index]['id'],drivertrips[index]['stop'].last, context);
+                                            startTrip(drivertrips[index]['stop'][0]['name'].toString(),drivertrips[index]['id'],drivertrips[index]['stop'][0]['stops'].last['name'].toString(), context);
+
                                           },
                                           child: Text('Start'),
                                         ),

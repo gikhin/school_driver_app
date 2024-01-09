@@ -35,7 +35,7 @@ class _MyTripsState extends State<MyTrips> {
 
   ///api functions
   Future<void> addstop(List<dynamic> trips) async {
-    print('add stop function called.....');
+    print('add stop function called....');
     print(trips);
 
 
@@ -56,6 +56,7 @@ class _MyTripsState extends State<MyTrips> {
       'school_name': schoolNameController.text,
       'stop': trips,
     };
+
 
     try {
       final response = await http.post(
@@ -154,6 +155,7 @@ class _MyTripsState extends State<MyTrips> {
 
         print('API call success: ${response.body}');
       } else {
+        Fluttertoast.showToast(msg: 'Start trip failed !');
         // Handle error response
         print('API call failed with status ${response.statusCode}');
         print('Response body: ${response.body}');
@@ -268,14 +270,38 @@ class _MyTripsState extends State<MyTrips> {
   }
 
 
-  void _onPlaceSelected(String place) {
-    // Fill the selected place in the TextField
-    setState(() {
-      schoolNameController.text = place;
-      // Optionally, you can close the suggestions list here
-      _predictions.clear();
-    });
+  void _onPlaceSelected(String place) async {
+    try {
+      List<Location> locations = await locationFromAddress(place);
+
+      if (locations.isNotEmpty) {
+        double latitude = locations.first.latitude;
+        double longitude = locations.first.longitude;
+
+        setState(() {
+          schoolNameController.text = place;
+          _predictions.clear();
+
+          Map<String, dynamic> schoolEntry = {
+            'name': place,
+            'latitude': latitude,
+            'longitude': longitude,
+          };
+          tripEntrieses.add({'school': schoolEntry, 'stops': []});
+        });
+
+        // Display information in the console
+        print('Selected School:');
+        print('Namesss: $place');
+        print('Latitudeplace: $latitude');
+        print('Longitudeplace: $longitude');
+      }
+    } catch (error) {
+      print('Error while geocoding place: $error');
+      // Handle the error as needed
+    }
   }
+
 
   ///Adding stops
   void _onsStopChanged(String query) {
@@ -334,14 +360,39 @@ class _MyTripsState extends State<MyTrips> {
   }
 
 
-  void _onStopSelected(String place) {
-    // Fill the selected place in the TextField
-    setState(() {
-      stopControllers.last.text = place;
-      // Optionally, you can close the suggestions list here
-      _stopPredictions.clear();
-    });
+  void _onStopSelected(String place) async {
+    try {
+      List<Location> locations = await locationFromAddress(place);
+
+      if (locations.isNotEmpty) {
+        double latitude = locations.first.latitude;
+        double longitude = locations.first.longitude;
+
+        setState(() {
+          stopControllers.last.text = place;
+          _stopPredictions.clear();
+
+          Map<String, dynamic> stopEntry = {
+            'name': place,
+            'latitude': latitude,
+            'longitude': longitude,
+          };
+          tripEntrieses.last['stops'].add(stopEntry);
+        });
+
+        // Display information in the console
+        print('Selected Stop:');
+        print('Namesssss: $place');
+        print('Latitudesss: $latitude');
+        print('Longitudessssss: $longitude');
+      }
+    } catch (error) {
+      print('Error while geocoding stop: $error');
+      // Handle the error as needed
+    }
   }
+
+
 
 
 
@@ -447,17 +498,20 @@ class _MyTripsState extends State<MyTrips> {
                                 children: [
                                   ListView.builder(
                                     shrinkWrap: true,
-                                    itemCount: drivertrips[index]['stop'].length,
+                                    itemCount: drivertrips[index]['stop'][0]['stops'].length,
                                     itemBuilder: (context, subIndex) {
-                                      if (subIndex < drivertrips[index]['stop'].length) {
+                                      if (subIndex < drivertrips[index]['stop'][0]['stops'].length) {
                                         return ListTile(
-                                          title: Text('${drivertrips[index]['stop'][subIndex]}' ?? ''),
+                                          title: Text(
+                                            '${drivertrips[index]['stop'][0]['stops'][subIndex]['name']}' ?? '',
+                                          ),
                                         );
                                       } else {
                                         return SizedBox.shrink();
                                       }
                                     },
                                   )
+
 
 
                                 ],
@@ -486,11 +540,12 @@ class _MyTripsState extends State<MyTrips> {
                                     child: ElevatedButton(
                                       style: ElevatedButton.styleFrom(backgroundColor: scanColor),
                                       onPressed: () {
+                                        print('BBBBB');
                                         print('for trip id is:${drivertrips[index]['id']}');
-                                        print('stop name  is: ${drivertrips[index]['stop'][0]}');
-                                        print('stop end_stopname is: ${drivertrips[index]['stop'].last}');
+                                        print('stop name  is: ${drivertrips[index]['stop'][0]['stops'][0]['name']}');
+                                        print('stop end_stopname is: ${drivertrips[index]['stop'][0]['stops'].last['name']}');
 
-                                        startTrip(drivertrips[index]['stop'][0],drivertrips[index]['id'],drivertrips[index]['stop'].last, context);
+                                        startTrip(drivertrips[index]['stop'][0]['name'].toString(),drivertrips[index]['id'],drivertrips[index]['stop'][0]['stops'].last['name'].toString(), context);
 
                                       },
                                       child: Text('Start'),
@@ -687,9 +742,19 @@ class _MyTripsState extends State<MyTrips> {
                       //   longitude: ''
                       // );
 
-                      List<String>stopNames = stopControllers.map((controller) => controller.text).toList();
-                      print('stopNames are:${stopNames}');
-                      tripEntrieses.addAll(stopNames);
+                      // Map<String, dynamic> tripEntry = {
+                      //   'schoolName': schoolNameController.text,
+                      //   'stops': [],
+                      // };
+
+                      // for (int i = 0; i < stopControllers.length; i++) {
+                      //   Map<String, String> stopEntry = {
+                      //     'name': stopControllers[i].text,
+                      //   };
+                      //   tripEntry['stops'].add(stopEntry);
+                      // }
+
+                      // tripEntrieses.add(tripEntry);
                       // tripEntrieses.add(stopControllers.map((e) => e.text).toList());
                       // tripEntrieses.add(
                       //   TripEntry(schoolName: schoolNameController.text,
@@ -700,6 +765,7 @@ class _MyTripsState extends State<MyTrips> {
                       addstop(tripEntrieses);
                       stopControllers.clear();
                       schoolNameController.clear();
+                      tripEntrieses.clear();
                     });
                     stopControllers.forEach((controller) => controller.clear());
                   }, child: Text('Add Now')),
